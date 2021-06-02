@@ -7,7 +7,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const jwtMiddle = require("express-jwt"); // 验证jwt数据
 const cors = require("cors"); // 服务器端处理跨域
-
+require("./db");
 const { jwtSecret } = require("./utils/config");
 const { Manager } = require("./models");
 
@@ -24,41 +24,19 @@ app.engine("html", ejs.renderFile);
 // parse application/x-www-form-urlencoded
 app.use(
   bodyParser.urlencoded({
-    extended: false,
-    limit: "10000kb"
+    extended: false
   })
 );
 // parse application/json
 app.use(
-  bodyParser.json({
-    limit: "10000kb"
-  })
+  bodyParser.json()
 );
 app.all("/api/*", cors());
 
 app.get("/", (req, res) => {
   res.render("index", { t: "什么都没有！" });
 });
-
-app.get("/api/v3/get_data", (req, res) => {
-  setTimeout(function () {
-    res.send({
-      code: 1
-    });
-  }, 10000);
-});
-
 app.use("/", express.static("./public"));
-
-app.use("/api/v1/products", require("./api/v1/products"));
-app.use("/api/v1/book_categories", require("./api/v1/book_categories"));
-app.use("/api/v1/books", require("./api/v1/books"));
-app.use("/api/v1/book_chapters", require("./api/v1/book_chapters"));
-app.use("/api/v1/product_categories", require("./api/v1/product_categories"));
-app.use("/api/v1/articles", require("./api/v1/articles")); // 文章
-app.use("/api/v1/article_comments", require("./api/v1/article_comments")); // 评论
-app.use("/api/v2/proxy", require("./api/v2/proxy"));
-// 对api使用jwt权限验证
 app.use(
   jwtMiddle({
     secret: jwtSecret
@@ -87,26 +65,14 @@ app.all("/api/v1/admin/*", async (req, res, next) => {
     });
   }
 });
-// app.use(jwt({
-//   secret: jwtSecret
-// }).unless({
-//   path: [new RegExp('/api/v1/users/*'), new RegExp('/api/v1/common/*')],
-// }));
-app.use("/api/v1/common", require("./api/v1/common"));
-app.use("/api/v1/admin/products", require("./api/v1/admin/products"));
-app.use("/api/v1/admin/users", require("./api/v1/admin/users"));
+app.use("/api/v1/admin/notes", require("./api/v1/admin/notes"));
 app.use(
-  "/api/v1/admin/product_categories",
-  require("./api/v1/admin/product_categories")
+  "/api/v1/admin/note_categories",
+  require("./api/v1/admin/note_categories")
 );
-app.use("/api/v1/admin/addresses", require("./api/v1/admin/addresses"));
-app.use("/api/v1/admin/orders", require("./api/v1/admin/orders"));
+app.use("/api/v1/common", require("./api/v1/common"));
+app.use("/api/v1/notes", require("./api/v1/notes"));
 app.use("/api/v1/auth", require("./api/v1/auth"));
-app.use("/api/v1/pub", require("./api/v1/pub")); // 发布评论和帖子
-app.use("/api/v1/users", require("./api/v1/users"));
-app.use("/api/v1/shop_carts", require("./api/v1/shop_carts"));
-app.use("/api/v1/orders", require("./api/v1/orders"));
-app.use("/api/v1/addresses", require("./api/v1/addresses"));
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   var err = new Error("Not Found");
@@ -132,7 +98,6 @@ var port = process.env.PORT || 3005;
 app.listen(port, () => {
   console.log(`server is running on port ${port}`);
 });
-require("./db");
 
 // 初始化超级管理员
 async function initManager() {
@@ -141,7 +106,7 @@ async function initManager() {
   });
   if (isExist == 0) {
     const slat = bcrypt.genSaltSync(10);
-    const pwd = bcrypt.hashSync("admin@12138", slat); // 对密码进行加密
+    const pwd = bcrypt.hashSync("123987@qp", slat); // 对密码进行加密
     const admin = new Manager({
       userName: "admin",
       password: pwd,

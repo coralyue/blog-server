@@ -43,45 +43,6 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.post("/reg", async (req, res, next) => {
-  try {
-    const { userName } = req.body;
-    console.log(req.body);
-    const isUserExist = await User.count({
-      userName
-    });
-    if (isUserExist > 0) {
-      res.json({
-        code: "error",
-        message: "用户名已存在！"
-      });
-    } else {
-      const user = new User(req.body);
-      const { password } = req.body;
-      const slat = bcrypt.genSaltSync(10);
-      const pwd = bcrypt.hashSync(password, slat); // 对密码进行加密
-      user.password = pwd;
-      const userResult = await user.save();
-      // res.json(userResult);
-      const token = jwt.sign(
-        {
-          userId: userResult.id
-        },
-        jwtSecret,
-        {
-          expiresIn: "10h"
-        }
-      );
-      res.json({
-        code: "success",
-        token
-      });
-    }
-  } catch (err) {
-    next(err);
-  }
-});
-
 router.post("/manager_login", async (req, res, next) => {
   try {
     const { userName, password } = req.body;

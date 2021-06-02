@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 mongoose
-  .connect("mongodb://localhost:27017/blog-server", {
+  .connect("mongodb://localhost:27017/note-server", {
     useNewUrlParser: true
   })
   .then(res => {
